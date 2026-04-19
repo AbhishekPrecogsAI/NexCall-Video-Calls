@@ -5,17 +5,35 @@ const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
+
+// ✅ Single source of truth
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://nex-call-video-calls.vercel.app"
+];
+
+// ✅ Express CORS (ONLY ONCE)
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
 const server = http.createServer(app);
 
+// ✅ Socket.IO CORS (MATCH SAME ORIGINS)
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
 
-app.use(cors({ origin: "http://localhost:5173" }));
-app.use(express.json());
 
 // In-memory store
 const rooms = new Map(); // roomId -> { users: Map<socketId, { username, socketId }> }
